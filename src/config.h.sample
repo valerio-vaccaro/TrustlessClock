@@ -1,0 +1,25 @@
+const int timeZone = 1;     // Central European Time for the scammy NTP data
+
+// Bitcoin core
+const char * coreUrl = "";
+const int corePort = 8332;
+const char * coreUser = "";
+const char * corePassword = "";
+
+// Bitcoin core testnet
+const char * coretUrl = "";
+const int coretPort = 18332;
+const char * coretUser = "";
+const char * coretPassword = "";
+
+// Litecoin core
+const char * coreLUrl = "";
+const int coreLPort = 9332;
+const char * coreLUser = "";
+const char * coreLPassword = "";
+
+// Litecoin core testnet
+const char * coreLtUrl = "";
+const int coreLtPort = 19332;
+const char * coreLtUser = "";
+const char * coreLtPassword = "";
