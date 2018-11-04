@@ -137,7 +137,11 @@ void bitcoin_timestamp() {
       USE_SERIAL.println("Parsing failed");
     } else {
       time_t t = atol(parsed["result"]["time"]);
-      ez.msgBox("BTC timestamp", String(day(t))+"/"+String(month(t))+"/"+String(year(t))+" "+String(hour(t))+":"+String(minute(t)) );
+      if (minute(t) < 10) {
+        ez.msgBox("BTC timestamp", String(day(t))+"/"+String(month(t))+"/"+String(year(t))+" "+String(hour(t))+":0"+String(minute(t)) );
+      } else {
+        ez.msgBox("BTC timestamp", String(day(t))+"/"+String(month(t))+"/"+String(year(t))+" "+String(hour(t))+":"+String(minute(t)) );
+      }
     }
   } else {
     ez.msgBox("BTC timestamp", "ERROR");
