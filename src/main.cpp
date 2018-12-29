@@ -20,6 +20,7 @@ void bitcoin_menus();
 void bitcoint_menus();
 void bitcoinL_menus();
 void bitcoinLt_menus();
+void liquid_menus();
 void powerOff();
 void about();
 
@@ -30,6 +31,7 @@ void loop() {
   mainmenu.addItem("Bitcoin testnet", bitcoint_menus);
   mainmenu.addItem("Litecoin", bitcoinL_menus);
   mainmenu.addItem("Litecoin testnet", bitcoinLt_menus);
+  mainmenu.addItem("Liquid", liquid_menus);
   mainmenu.addItem("Built-in wifi & other settings", ez.settings.menu);
   mainmenu.addItem("About", about);
   mainmenu.addItem("Power off", powerOff);
@@ -757,6 +759,137 @@ void bitcoinLt_tx() {
     }
   } else {
     ez.msgBox("LTC testnet transactions", "ERROR");
+  }
+  http.end();
+}
+
+void liquid_heigh();
+void liquid_hash();
+void liquid_merkle();
+void liquid_tx();
+void liquid_timestamp();
+
+void liquid_menus() {
+  ezMenu submenu("Liquid last block");
+  submenu.txtSmall();
+  submenu.buttons("up#Back#select##down#");
+  submenu.addItem("Heigh", liquid_heigh);
+  submenu.addItem("Hash", liquid_hash);
+  submenu.addItem("Merkle root", liquid_merkle);
+  submenu.addItem("Timestamp", liquid_timestamp);
+  submenu.addItem("Exit | Go back to main menu");
+  submenu.run();
+}
+
+void liquid_heigh() {
+  http.begin(liquidUrl, liquidPort);
+  http.setAuthorization(liquidUser, liquidPassword);
+  char buff[255];
+  sprintf(buff,"{\"jsonrpc\":\"1.0\",\"id\":\"curltext\",\"method\":\"getblockcount\",\"params\":[]}");
+  int httpCode = http.POST((uint8_t *) buff, strlen(buff));
+  if(httpCode == HTTP_CODE_OK) {
+    StaticJsonBuffer<300> JSONBuffer;
+    JsonObject& parsed = JSONBuffer.parseObject(http.getString());
+    if (!parsed.success()) {
+      USE_SERIAL.println("Parsing failed");
+    } else {
+      ez.msgBox("Liquid heigh", parsed["result"]);
+    }
+  } else {
+    ez.msgBox("Liquid heigh", "ERROR");
+  }
+  http.end();
+}
+
+void liquid_hash() {
+  http.begin(liquidUrl, liquidPort);
+  http.setAuthorization(liquidUser, liquidPassword);
+  char buff[255];
+  sprintf(buff,"{\"jsonrpc\":\"1.0\",\"id\":\"curltext\",\"method\":\"getbestblockhash\",\"params\":[]}");
+  int httpCode = http.POST((uint8_t *) buff, strlen(buff));
+  if(httpCode == HTTP_CODE_OK) {
+    StaticJsonBuffer<300> JSONBuffer;
+    JsonObject& parsed = JSONBuffer.parseObject(http.getString());
+    if (!parsed.success()) {
+      USE_SERIAL.println("Parsing failed");
+    } else {
+      ez.textBox("Liquid hash", parsed["result"]);
+    }
+  } else {
+    ez.msgBox("Liquid hash", "ERROR");
+  }
+  http.end();
+}
+
+void liquid_timestamp() {
+  const char * hash;
+  http.begin(liquidUrl, liquidPort);
+  http.setAuthorization(liquidUser, liquidPassword);
+  char buff[255];
+  sprintf(buff,"{\"jsonrpc\":\"1.0\",\"id\":\"curltext\",\"method\":\"getbestblockhash\",\"params\":[]}");
+  int httpCode = http.POST((uint8_t *) buff, strlen(buff));
+  if(httpCode == HTTP_CODE_OK) {
+    StaticJsonBuffer<300> JSONBuffer;
+    JsonObject& parsed = JSONBuffer.parseObject(http.getString());
+    if (!parsed.success()) {
+      USE_SERIAL.println("Parsing failed");
+    } else {
+      hash = (const char *) parsed["result"];
+    }
+  }
+  http.end();
+
+  http.begin(liquidUrl, liquidPort);
+  http.setAuthorization(liquidUser, liquidPassword);
+  sprintf(buff,"{\"jsonrpc\":\"1.0\",\"id\":\"curltext\",\"method\":\"getblockheader\",\"params\":[\"%s\"]}", hash );
+  httpCode = http.POST((uint8_t *) buff, strlen(buff));
+  if(httpCode == HTTP_CODE_OK) {
+    int pos = 0;
+    String s = http.getString();
+    pos = s.indexOf("time")+6;
+    time_t t = s.substring(pos, pos+10).toInt();
+    if (minute(t) < 10) {
+      ez.msgBox("Liquid timestamp", String(day(t))+"/"+String(month(t))+"/"+String(year(t))+" "+String(hour(t))+":0"+String(minute(t)) );
+    } else {
+      ez.msgBox("Liquid timestamp", String(day(t))+"/"+String(month(t))+"/"+String(year(t))+" "+String(hour(t))+":"+String(minute(t)) );
+    }
+  } else {
+    ez.msgBox("Liquid timestamp", "ERROR");
+  }
+  http.end();
+}
+
+
+void liquid_merkle() {
+  const char * hash;
+  http.begin(liquidUrl, liquidPort);
+  http.setAuthorization(liquidUser, liquidPassword);
+  char buff[255];
+  sprintf(buff,"{\"jsonrpc\":\"1.0\",\"id\":\"curltext\",\"method\":\"getbestblockhash\",\"params\":[]}");
+  int httpCode = http.POST((uint8_t *) buff, strlen(buff));
+  if(httpCode == HTTP_CODE_OK) {
+    StaticJsonBuffer<300> JSONBuffer;
+    JsonObject& parsed = JSONBuffer.parseObject(http.getString());
+    if (!parsed.success()) {
+      USE_SERIAL.println("Parsing failed");
+    } else {
+      hash = (const char *) parsed["result"];
+    }
+  }
+  http.end();
+
+  http.begin(liquidUrl, liquidPort);
+  http.setAuthorization(liquidUser, liquidPassword);
+  sprintf(buff,"{\"jsonrpc\":\"1.0\",\"id\":\"curltext\",\"method\":\"getblockheader\",\"params\":[\"%s\"]}", hash );
+  USE_SERIAL.println(buff);
+  httpCode = http.POST((uint8_t *) buff, strlen(buff));
+  if(httpCode == HTTP_CODE_OK) {
+    int pos = 0;
+    String s = http.getString();
+    pos = s.indexOf("merkleroot")+13;
+    ez.msgBox("Liquid merkle root", s.substring(pos, pos+64));
+  } else {
+      ez.msgBox("Liquid merkle root", "ERROR");
   }
   http.end();
 }

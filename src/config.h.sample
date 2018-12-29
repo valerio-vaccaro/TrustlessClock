@@ -23,3 +23,9 @@ const char * coreLtUrl = "";
 const int coreLtPort = 19332;
 const char * coreLtUser = "";
 const char * coreLtPassword = "";
+
+// Liquid sidechain
+const char * liquidUrl = "";
+const int liquidPort = 7041;
+const char * liquidUser = "";
+const char * liquidPassword = "";
